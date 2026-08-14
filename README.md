@@ -15,3 +15,20 @@
 </p>
 
 # August 14, 2026 
+
+### What I worked on
+- I continued on my ball platform game
+- Fixed tag identication error
+- added new powerup that shoots bullets to people
+
+### What I learned
+- I learned foreach
+- I got a better understanding on how FindObjectByType
+
+### Problems
+- I reused the projectile from enemy which hit me at the beginning so I made a different bullet that doesnt affect player
+- The FindObjectByType I was using was outdated
+
+### Next
+- I'm planning to add the gem in game and make bullets more powerful
+- Also making the scripts more dynamic
