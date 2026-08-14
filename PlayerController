@@ -1,0 +1,137 @@
+using UnityEngine;
+using UnityEngine.Rendering;
+using System.Collections;
+using Unity.VisualScripting;
+
+public enum PowerupType
+{
+    None,
+    Pushback,
+    Rockets
+}
+
+public class PlayerController : MonoBehaviour
+{
+    public PowerupType powerupType;
+    private Rigidbody playerRb;
+    private GameObject focalPoint;
+    public float speed = 5;
+    private float powerUpStrength = 15.0f;
+    private float enemyResistance;
+    private InputSystem_Actions controls;
+    public bool hasPowerup = false;
+    public bool hasShootPowerup = false;
+    public GameObject[] powerIndicator;
+    public GameObject projectilePrefab;
+
+
+    void Awake()
+    {
+        controls = new InputSystem_Actions();
+    }
+
+    void OnEnable()
+    {
+        controls.Player.Enable();
+    }
+
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Start()
+    {
+        playerRb = GetComponent<Rigidbody>();
+        focalPoint = GameObject.Find("FocalPoint");
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        Vector2 movementInput = controls.Player.Move.ReadValue<Vector2>();
+        float forwardInput = movementInput.y;
+
+        playerRb.AddForce(focalPoint.transform.forward * movementInput.y * speed);
+
+        powerIndicator[0].transform.position = transform.position;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("PushPower") )
+        {
+            Destroy(other.gameObject);
+            hasPowerup = true;
+            powerIndicator[0].gameObject.SetActive(true);
+            StartCoroutine(PowerupCountdownRoutine(0));
+        } else if (other.CompareTag("ShooterPower"))
+        {
+            Destroy(other.gameObject);
+            powerIndicator[1].gameObject.SetActive(true);
+            shootPowerup();
+            StartCoroutine(PowerupCountdownRoutine(1));
+        }
+    }
+
+    void shootPowerup()
+    {
+        EnemyComponent[] enemies = FindObjectsByType<EnemyComponent>();
+
+        foreach(EnemyComponent enemy in enemies)
+        {
+            Vector3 direction = (enemy.transform.position - transform.position).normalized;
+            for (int i = 0; i < 2; i++)
+            {
+                Instantiate(projectilePrefab, transform.position, Quaternion.LookRotation(direction));
+                
+            }
+        }
+    }
+
+    IEnumerator PowerupCountdownRoutine(int indicatorType)
+    {
+        yield return new WaitForSeconds(7);
+        hasPowerup = false;
+        powerIndicator[indicatorType].gameObject.SetActive(false);
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy") && hasPowerup)
+        {
+            Rigidbody enemyRb = collision.gameObject.GetComponent<Rigidbody>();
+
+            Vector3 awayFromPlayer = collision.transform.position - transform.position;
+
+            enemyRb.AddForce(awayFromPlayer * powerUpStrength, ForceMode.Impulse);
+
+        }
+        else if (collision.gameObject.CompareTag("PushEnemy") && hasPowerup)
+        {
+            enemyResistance = 5.0f;
+
+            Rigidbody enemyRb = collision.gameObject.GetComponent<Rigidbody>();
+
+            Vector3 awayFromPlayer = collision.transform.position - transform.position;
+
+            enemyRb.AddForce(awayFromPlayer * (powerUpStrength - enemyResistance), ForceMode.Impulse);
+        }
+        else if (collision.gameObject.CompareTag("StickyEnemy") && hasPowerup)
+        {
+            enemyResistance = -60.0f;
+
+            Rigidbody enemyRb = collision.gameObject.GetComponent<Rigidbody>();
+
+            Vector3 awayFromPlayer = collision.transform.position - transform.position;
+
+            enemyRb.AddForce(awayFromPlayer * (powerUpStrength - enemyResistance), ForceMode.Impulse);
+        }
+        else if (collision.gameObject.CompareTag("Projectile"))
+        {
+            int bulletStrength = 10;
+
+            Vector3 knockbackDirection = (transform.position - collision.transform.position).normalized;
+
+            playerRb.AddForce(knockbackDirection * bulletStrength, ForceMode.Impulse);
+
+            Destroy(collision.gameObject);
+        }
+    }
+}
