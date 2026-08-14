@@ -1,0 +1,95 @@
+using System.Runtime.InteropServices.WindowsRuntime;
+using UnityEngine;
+
+public class SpawnManagee : MonoBehaviour
+{
+    public GameObject[] enemyPrefab;
+    public GameObject powerUpPrefab;
+
+    public int enemyCount;
+    public int splitter = 0;
+
+    private int minimumEnemies = 1;
+    private int maximumEnemies = 3;
+    private int spawnEnemyCount = 1;
+
+    private int waveNumber;
+
+    void Start()
+    {
+        waveNumber = 1;
+        spawnEnemyCount = Random.Range(minimumEnemies, maximumEnemies);
+        SpawnEnemyWave(spawnEnemyCount);
+    }
+
+    void Update()
+    {
+        enemyCount = FindObjectsByType<EnemyComponent>().Length;
+
+        if (enemyCount == 0)
+        {
+            minimumEnemies++;
+            maximumEnemies++;
+
+            spawnEnemyCount = Random.Range(minimumEnemies, maximumEnemies);
+
+            waveNumber++;
+            SpawnEnemyWave(spawnEnemyCount);
+            SpawnPowerUp();
+        }
+    }
+
+    void SpawnEnemyWave(int amount)
+    {
+        for (int i = 0; i < amount; i++)
+        {
+            int enemyIndex = GetWeightedEnemyIndex();
+
+            Instantiate(
+                enemyPrefab[enemyIndex],
+                GenerateRandomPosition(),
+                enemyPrefab[enemyIndex].transform.rotation
+            );
+        }
+    }
+
+    int GetWeightedEnemyIndex()
+    {
+        int randomValue = Random.Range(0, 100);
+
+        // StickyBall
+        if (randomValue < 20 && waveNumber >= 3)
+        {
+            return 0;
+        }
+        else if(randomValue < 35 && waveNumber >= 3) // ShootingEnemy
+        {
+            return 3;
+        }
+        else if (randomValue < 60 && waveNumber >= 2) // PushEnemy
+        {
+            return 1;
+        }
+        else // NormalEnemy
+        {
+            return 2;
+        }
+    }
+
+    void SpawnPowerUp()
+    {
+        if (splitter % 2 == 0)
+        {
+            Instantiate(powerUpPrefab, GenerateRandomPosition(), powerUpPrefab.transform.rotation);
+        }
+        splitter += 1;
+    }
+
+    private Vector3 GenerateRandomPosition()
+    {
+        float spawnRangeX = Random.Range(-9f, 9f);
+        float spawnRangeZ = Random.Range(-9f, 9f);
+
+        return new Vector3(spawnRangeX, 0, spawnRangeZ);
+    }
+}
