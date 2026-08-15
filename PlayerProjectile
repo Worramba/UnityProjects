@@ -1,0 +1,30 @@
+using UnityEngine;
+
+public class PlayerProjectile : MonoBehaviour
+{
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Start()
+    {
+        Destroy(gameObject, 4f);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        float speed = 10.0f;
+
+        transform.Translate(Vector3.forward * speed * Time.deltaTime);
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.GetComponent<EnemyComponent>())
+        {
+            Rigidbody enemyRb = collision.gameObject.GetComponent<Rigidbody>();
+
+            Vector3 awayFromBullet = collision.gameObject.transform.position - transform.position;
+            enemyRb.AddForce(awayFromBullet * 10, ForceMode.Impulse);
+            Destroy(gameObject);
+        }
+    }
+}
