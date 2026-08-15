@@ -1,137 +1,148 @@
-using UnityEngine;
-using UnityEngine.Rendering;
-using System.Collections;
-using Unity.VisualScripting;
+    using UnityEngine;
+    using UnityEngine.Rendering;
+    using System.Collections;
+    using Unity.VisualScripting;
 
-public enum PowerupType
-{
-    None,
-    Pushback,
-    Rockets
-}
-
-public class PlayerController : MonoBehaviour
-{
-    public PowerupType powerupType;
-    private Rigidbody playerRb;
-    private GameObject focalPoint;
-    public float speed = 5;
-    private float powerUpStrength = 15.0f;
-    private float enemyResistance;
-    private InputSystem_Actions controls;
-    public bool hasPowerup = false;
-    public bool hasShootPowerup = false;
-    public GameObject[] powerIndicator;
-    public GameObject projectilePrefab;
-
-
-    void Awake()
+    public enum PowerupType
     {
-        controls = new InputSystem_Actions();
+        None,
+        Pushback,
+        Rockets
     }
 
-    void OnEnable()
+    public class PlayerController : MonoBehaviour
     {
-        controls.Player.Enable();
-    }
+        public PowerupType powerupType;
+        private Rigidbody playerRb;
+        private GameObject focalPoint;
+        public float speed = 5;
+        private float powerUpStrength = 15.0f;
+        private float enemyResistance;
+        private InputSystem_Actions controls;
+        public bool hasPowerup = false;
+        public bool hasShootPowerup = false;
+        public GameObject[] powerIndicator;
+        public GameObject projectilePrefab;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        playerRb = GetComponent<Rigidbody>();
-        focalPoint = GameObject.Find("FocalPoint");
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        Vector2 movementInput = controls.Player.Move.ReadValue<Vector2>();
-        float forwardInput = movementInput.y;
-
-        playerRb.AddForce(focalPoint.transform.forward * movementInput.y * speed);
-
-        powerIndicator[0].transform.position = transform.position;
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("PushPower") )
+        void Awake()
         {
-            Destroy(other.gameObject);
-            hasPowerup = true;
-            powerIndicator[0].gameObject.SetActive(true);
-            StartCoroutine(PowerupCountdownRoutine(0));
-        } else if (other.CompareTag("ShooterPower"))
-        {
-            Destroy(other.gameObject);
-            powerIndicator[1].gameObject.SetActive(true);
-            shootPowerup();
-            StartCoroutine(PowerupCountdownRoutine(1));
+            controls = new InputSystem_Actions();
         }
+
+        void OnEnable()
+        {
+            controls.Player.Enable();
+        }
+
+        // Start is called once before the first execution of Update after the MonoBehaviour is created
+        void Start()
+        {
+            playerRb = GetComponent<Rigidbody>();
+            focalPoint = GameObject.Find("FocalPoint");
+        }
+
+        // Update is called once per frame
+        void Update()
+        {
+            Vector2 movementInput = controls.Player.Move.ReadValue<Vector2>();
+            float forwardInput = movementInput.y;
+
+            playerRb.AddForce(focalPoint.transform.forward * movementInput.y * speed);
+
+            powerIndicator[0].transform.position = transform.position;
+            powerIndicator[1].transform.position = transform.position;
     }
 
-    void shootPowerup()
-    {
-        EnemyComponent[] enemies = FindObjectsByType<EnemyComponent>();
-
-        foreach(EnemyComponent enemy in enemies)
+        private void OnTriggerEnter(Collider other)
         {
-            Vector3 direction = (enemy.transform.position - transform.position).normalized;
-            for (int i = 0; i < 2; i++)
+            if (other.CompareTag("PushPower") )
             {
-                Instantiate(projectilePrefab, transform.position, Quaternion.LookRotation(direction));
-                
+                Destroy(other.gameObject);
+                hasPowerup = true;
+                powerIndicator[0].gameObject.SetActive(true);
+                StartCoroutine(PowerupCountdownRoutine(0, "hasPowerup"));
+            } else if (other.CompareTag("ShooterPower"))
+            {
+                Destroy(other.gameObject);
+                hasShootPowerup = true;
+                powerIndicator[1].gameObject.SetActive(true);
+                StartCoroutine(shootPowerup());
+                StartCoroutine(PowerupCountdownRoutine(1, "hasShootPowerup"));
+            }
+        }
+
+        IEnumerator shootPowerup()
+        {
+            while(hasShootPowerup)
+            { 
+                EnemyComponent[] enemies = FindObjectsByType<EnemyComponent>();
+
+                foreach (EnemyComponent enemy in enemies)
+                {
+
+                    Vector3 direction = (enemy.transform.position - transform.position).normalized;
+
+                    Instantiate(projectilePrefab, transform.position, Quaternion.LookRotation(direction));
+                }
+                yield return new WaitForSeconds(1.5f);
+            }
+        }
+
+        IEnumerator PowerupCountdownRoutine(int indicatorType, string powerupName)
+        {
+            yield return new WaitForSeconds(7);
+            if (powerupName == "hasPowerup")
+            {
+                hasPowerup = false;
+            }
+            else if (powerupName == "hasShootPowerup")
+            {
+                hasShootPowerup = false;
+            }
+            powerIndicator[indicatorType].gameObject.SetActive(false);
+        }
+
+        private void OnCollisionEnter(Collision collision)
+        {
+            if (collision.gameObject.CompareTag("Enemy") && hasPowerup)
+            {
+                Rigidbody enemyRb = collision.gameObject.GetComponent<Rigidbody>();
+
+                Vector3 awayFromPlayer = collision.transform.position - transform.position;
+
+                enemyRb.AddForce(awayFromPlayer * powerUpStrength, ForceMode.Impulse);
+
+            }
+            else if (collision.gameObject.CompareTag("PushEnemy") && hasPowerup)
+            {
+                enemyResistance = 5.0f;
+
+                Rigidbody enemyRb = collision.gameObject.GetComponent<Rigidbody>();
+
+                Vector3 awayFromPlayer = collision.transform.position - transform.position;
+
+                enemyRb.AddForce(awayFromPlayer * (powerUpStrength - enemyResistance), ForceMode.Impulse);
+            }
+            else if (collision.gameObject.CompareTag("StickyEnemy") && hasPowerup)
+            {
+                enemyResistance = -60.0f;
+
+                Rigidbody enemyRb = collision.gameObject.GetComponent<Rigidbody>();
+
+                Vector3 awayFromPlayer = collision.transform.position - transform.position;
+
+                enemyRb.AddForce(awayFromPlayer * (powerUpStrength - enemyResistance), ForceMode.Impulse);
+            }
+            else if (collision.gameObject.CompareTag("Projectile"))
+            {
+                int bulletStrength = 10;
+
+                Vector3 knockbackDirection = (transform.position - collision.transform.position).normalized;
+
+                playerRb.AddForce(knockbackDirection * bulletStrength, ForceMode.Impulse);
+
+                Destroy(collision.gameObject);
             }
         }
     }
-
-    IEnumerator PowerupCountdownRoutine(int indicatorType)
-    {
-        yield return new WaitForSeconds(7);
-        hasPowerup = false;
-        powerIndicator[indicatorType].gameObject.SetActive(false);
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Enemy") && hasPowerup)
-        {
-            Rigidbody enemyRb = collision.gameObject.GetComponent<Rigidbody>();
-
-            Vector3 awayFromPlayer = collision.transform.position - transform.position;
-
-            enemyRb.AddForce(awayFromPlayer * powerUpStrength, ForceMode.Impulse);
-
-        }
-        else if (collision.gameObject.CompareTag("PushEnemy") && hasPowerup)
-        {
-            enemyResistance = 5.0f;
-
-            Rigidbody enemyRb = collision.gameObject.GetComponent<Rigidbody>();
-
-            Vector3 awayFromPlayer = collision.transform.position - transform.position;
-
-            enemyRb.AddForce(awayFromPlayer * (powerUpStrength - enemyResistance), ForceMode.Impulse);
-        }
-        else if (collision.gameObject.CompareTag("StickyEnemy") && hasPowerup)
-        {
-            enemyResistance = -60.0f;
-
-            Rigidbody enemyRb = collision.gameObject.GetComponent<Rigidbody>();
-
-            Vector3 awayFromPlayer = collision.transform.position - transform.position;
-
-            enemyRb.AddForce(awayFromPlayer * (powerUpStrength - enemyResistance), ForceMode.Impulse);
-        }
-        else if (collision.gameObject.CompareTag("Projectile"))
-        {
-            int bulletStrength = 10;
-
-            Vector3 knockbackDirection = (transform.position - collision.transform.position).normalized;
-
-            playerRb.AddForce(knockbackDirection * bulletStrength, ForceMode.Impulse);
-
-            Destroy(collision.gameObject);
-        }
-    }
-}
