@@ -32,3 +32,4 @@
 ### Next
 - I'm planning to add the gem in game and make bullets more powerful
 - Also making the scripts more dynamic
+
