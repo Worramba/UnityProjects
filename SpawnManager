@@ -4,7 +4,7 @@ using UnityEngine;
 public class SpawnManagee : MonoBehaviour
 {
     public GameObject[] enemyPrefab;
-    public GameObject powerUpPrefab;
+    public GameObject[] powerUpPrefab;
 
     public int enemyCount;
     public int splitter = 0;
@@ -80,7 +80,10 @@ public class SpawnManagee : MonoBehaviour
     {
         if (splitter % 2 == 0)
         {
-            Instantiate(powerUpPrefab, GenerateRandomPosition(), powerUpPrefab.transform.rotation);
+            Instantiate(powerUpPrefab[0], GenerateRandomPosition(), powerUpPrefab[0].transform.rotation);
+        } else if (splitter % 3 == 0) 
+        {
+            Instantiate(powerUpPrefab[1], GenerateRandomPosition(), powerUpPrefab[1].transform.rotation);
         }
         splitter += 1;
     }
