@@ -33,3 +33,26 @@
 - I'm planning to add the gem in game and make bullets more powerful
 - Also making the scripts more dynamic
 
+# August 15, 2026 
+
+### What I worked on
+- I continued on my ball platform game
+- Added push power for the player bullets
+- Making the bullet shots timed every 1.5 seconds
+- Added the new power up into the spawn manager
+- Changed the indicator and powerup model
+
+### What I learned
+- I learned more on how coroutines work
+- Difference between CompareTag and GetComponent
+- Materials and how to use it correctly
+
+### Problems
+- I was using CompareTag for searching a component
+- The new power up was using the same material as the old so it both had same color
+- Trying to use as timer with Time.deltaTime but got lazy and used coroutines
+
+### Next
+- Adding 1 more enemy
+- Adding 1 more powerup
+- Also making the scripts more dynamic
