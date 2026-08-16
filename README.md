@@ -57,7 +57,7 @@
 - Adding 1 more powerup
 - Also making the scripts more dynamic
 
-# August 15, 2026 
+# August 16, 2026 
 
 ### What I worked on
 - I continued on my ball platform game
