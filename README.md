@@ -56,3 +56,22 @@
 - Adding 1 more enemy
 - Adding 1 more powerup
 - Also making the scripts more dynamic
+
+# August 15, 2026 
+
+### What I worked on
+- I continued on my ball platform game
+- Added boss enemy that spawn every 10 levels
+- Combined shoot and push enemy ability into boss
+
+### What I learned
+- How to reuse functions in different script
+
+### Problems
+- When adding the boss battle in the Spawn Manager, I put the boss chance at the end, which made it almost never spawn
+- Forgot to put rigidbody which didn't allow addForce to work
+- At the beginning, I planned to make a special script to remake the SpawnManager script for spawning boss enemies, but then decided to reuse the SpawnManager's function in the special script which felt like a waste, so I put everything for the boss in the SpawnManager script instead
+
+### Next
+- Adding 1 more powerup
+- Also making scripts more dynamic
