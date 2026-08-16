@@ -3,7 +3,7 @@
 <h3 align="center">My goal for making this account is to be in MIT and graduate with ComputerScience and Electrical Engineering PHD</h3>
 <h3 align="center">Roblox dev(sort of beginner) • Luau, Python and C# • Learning Game Systems & UI • Aspiring MIT CS & EE </h3>
 
-- 🔭 I’m currently working on **A roblox tycoon**
+- 🔭 I’m currently working on **A ball balancing game**
 
 - 🌱 I’m currently learning **Luau, Python and Unity**
 
