@@ -75,3 +75,22 @@
 ### Next
 - Adding 1 more powerup
 - Also making scripts more dynamic
+
+# August 18, 2026 
+
+### What I worked on
+- I continued on my ball platform game
+- Finished the core on how the new smash ability works
+
+### What I learned
+- Got more understanding on how courutines work
+- Learned a bit on awake
+
+### Problems
+- Using transform.Translate to make the player go up and down which looked a bit wierd but then instead chose to use AddForce for both for smoother movement
+- Forgoten to use .normalize for addforce
+
+### Next
+- Adding the power to game
+- Fixing some issues of the powerup
+- Also making scripts more dynamic
